@@ -1,46 +1,33 @@
 #!/usr/bin/python
 import praw
-import pdb
 import re
-import os
+import random
 
+# Quotes taken from: http://www.imdb.com/character/ch0007553/quotes
+marvin_quotes = \
+[
+" I've calculated your chance of survival, but I don't think you'll like it. ",
+" Do you want me to sit in a corner and rust or just fall apart where I'm standing?",
+"Here I am, brain the size of a planet, and they tell me to take you up to the bridge. Call that job satisfaction? Cause I don't. ",
+"Here I am, brain the size of a planet, and they ask me to pick up a piece of paper. ",
+" It gives me a headache just trying to think down to your level. ",
+" You think you've got problems. What are you supposed to do if you are a manically depressed robot? No, don't even bother answering. I'm 50,000 times more intelligent than you and even I don't know the answer.",
+"Zaphod Beeblebrox: There's a whole new life stretching out in front of you. Marvin: Oh, not another one.",
+"The first ten million years were the worst. And the second ten million... they were the worst too. The third ten million I didn't enjoy at all. After that, I went into a bit of a decline. ",
+"Sorry, did I say something wrong? Pardon me for breathing which I never do anyway so I don't know why I bother to say it oh God I'm so depressed. ",
+" I have a million ideas, but, they all point to certain death. ",
 
-# Create the Reddit instance
+]
+
 reddit = praw.Reddit('bot1')
 
-# and login
-#reddit.login(REDDIT_USERNAME, REDDIT_PASS)
+subreddit = reddit.subreddit("pythonforengineers")
 
-# Have we run this code before? If not, create an empty list
-if not os.path.isfile("posts_replied_to.txt"):
-    posts_replied_to = []
+for comment in subreddit.stream.comments():
+    print(comment.body)
+    if re.search("Marvin Help", comment.body, re.IGNORECASE):
+            marvin_reply = "Marvin the Depressed Robot says: " + random.choice(marvin_quotes)
+            comment.reply(marvin_reply)
+            print(marvin_reply)
+            
 
-# If we have run the code before, load the list of posts we have replied to
-else:
-    # Read the file into a list and remove any empty values
-    with open("posts_replied_to.txt", "r") as f:
-        posts_replied_to = f.read()
-        posts_replied_to = posts_replied_to.split("\n")
-        posts_replied_to = list(filter(None, posts_replied_to))
-
-# Get the top 5 values from our subreddit
-subreddit = reddit.subreddit('easyplayground')
-for submission in subreddit.hot(limit=10):
-    #print(submission.title)
-
-    # If we haven't replied to this post before
-    if submission.id not in posts_replied_to:
-
-        # Do a case insensitive search
-        if re.search("i love python", submission.title, re.IGNORECASE):
-            # Reply to the post
-            submission.reply("Nigerian scammer bot says: It's all about the Bass (and Python)")
-            print("Bot replying to : ", submission.title)
-
-            # Store the current id into our list
-            posts_replied_to.append(submission.id)
-
-# Write our updated list back to the file
-with open("posts_replied_to.txt", "w") as f:
-    for post_id in posts_replied_to:
-        f.write(post_id + "\n")
